@@ -15,9 +15,12 @@ MAPPER_ENDPOINTS = {
     }
 }
 
+
+TIPOS_EMENDAS = Literal['individuais', 'especiais', 'bancada']
+
 class UrlBuilder:
 
-    def __init__(self, https:bool=True):
+    def __init__(self, https:bool=True)->None:
 
         self.base_url = self.__build_base_url(https)
 
@@ -28,9 +31,14 @@ class UrlBuilder:
         base_url = protocol + DOMAIN + '/' + BASE_URL
 
         return base_url
+    
+    def __check_tipos_emendas(self, tipo_emenda:TIPOS_EMENDAS):
 
-    def __build_endpoint(self, *args, gerais:bool, tipo_emenda:Optional[
-                            Literal['individuais', 'especiais', 'bancada']]=None)->str:
+        tipos_aceitos = {'individuais', 'especiais', 'bancada'}
+        if tipo_emenda is not None and tipo_emenda not in tipos_aceitos:
+            raise ValueError(f'tipo_emenda must be in {tipos_aceitos}')
+
+    def __build_endpoint(self, *args, gerais:bool, tipo_emenda:Optional[TIPOS_EMENDAS]=None)->str:
         
         
         if gerais:
@@ -39,12 +47,12 @@ class UrlBuilder:
         if not gerais and tipo_emenda is None:
             raise ValueError('Se não buscar comunicados gerais deve definir tipo emenda')
         
+        self.__check_tipos_emendas(tipo_emenda)
         base_url= self.base_url + MAPPER_ENDPOINTS['cronogramas']['base']
         
         return base_url + MAPPER_ENDPOINTS['cronogramas'][tipo_emenda]
 
-    def __build_url(self, *args, gerais:bool, ano:int, tipo_emenda:Optional[
-                        Literal['individuais', 'especiais', 'bancada']]=None, )->str:
+    def __build_url(self, *args, gerais:bool, ano:int, tipo_emenda:Optional[TIPOS_EMENDAS]=None, )->str:
         
         endpoint = self.__build_endpoint(gerais=gerais, tipo_emenda=tipo_emenda)
 
@@ -55,7 +63,6 @@ class UrlBuilder:
         return endpoint + f'/{ano}'
 
     
-    def __call__(self, gerais:bool, ano:int, tipo_emenda:Optional[
-                    Literal['individuais', 'especiais', 'bancada']]=None)->str:
+    def __call__(self, gerais:bool, ano:int, tipo_emenda:Optional[TIPOS_EMENDAS]=None)->str:
         
         return self.__build_url(gerais=gerais, ano=ano, tipo_emenda=tipo_emenda)
