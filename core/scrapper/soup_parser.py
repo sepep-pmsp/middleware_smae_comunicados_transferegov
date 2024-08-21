@@ -150,6 +150,20 @@ class Parser:
                 raise(e)
         
         return parsed_data
+    
+    def parse_page(self)->dict:
+
+
+        pagina = {
+            'ultima_atualizacao' : self.ultima_autualizacao_pagina(),
+            'comunicados' : self.parse_comunicados()
+        }
+
+        return pagina
+    
+    def __call__(self)->dict:
+
+        return self.parse_page()
 
 
 
