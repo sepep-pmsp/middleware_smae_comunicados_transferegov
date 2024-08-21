@@ -1,10 +1,7 @@
 from requests import session
-from .build_url import UrlBuilder, TIPOS_EMENDAS
-from core.utils.datetime import get_curr_year
 from http import HTTPStatus
 from requests.exceptions import HTTPError
 import time
-from typing import Optional, Literal
 
 
 RETRY_CODES = [
@@ -23,10 +20,9 @@ USER_AGENT=('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML
 class PageRequest:
 
 
-    def __init__(self, https:bool=True)->None:
+    def __init__(self)->None:
 
         self.session = session()
-        self.build_url = UrlBuilder(https)
 
         #definindo a sessao
         self.__set_user_agent()
@@ -59,18 +55,11 @@ class PageRequest:
                 raise
         else:
             raise RuntimeError(f'Max retries exceeded for url: {url}. HTTP Exception: {exc}. Status code: {code}')
-        
-    def __get_page(self, *args, gerais:bool=True, tipo_emenda:Optional[TIPOS_EMENDAS]=None, ano:int=None)->str:
-
-        ano = ano or get_curr_year()
-        url = self.build_url(gerais=gerais, ano=ano, tipo_emenda=tipo_emenda)
-
-        return self.__get_n_retries(url)
     
 
-    def __call__(self, *args, gerais:bool=True, tipo_emenda:Optional[TIPOS_EMENDAS]=None, ano:int=None)->str:
+    def __call__(self, url:str)->str:
 
-        return self.__get_page(gerais=gerais, ano=ano, tipo_emenda=tipo_emenda)
+        return self.__get_n_retries(url)
 
 
 

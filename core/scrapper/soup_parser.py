@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 import bs4.element as elements
-from typing import List
+from typing import List, Optional
 import re
 
 from .decorators import nonetype_error_to_none, raise_for_missing_data
@@ -10,7 +10,11 @@ PATT_COMUNICADO=r"COMUNICADO\s*(?:[Nn][º°]\s*)?\d+/\d+"
 
 class Parser:
 
-    def __init__(self, html:str)->None:
+    def __init__(self)->None:
+
+        self.sopa = None
+
+    def set_html(self, html:str)->None:
 
         self.sopa = self.__build_soup(html)
 
@@ -153,6 +157,8 @@ class Parser:
     
     def parse_page(self)->dict:
 
+        if self.sopa is None:
+            raise ValueError('No html to parse.')
 
         pagina = {
             'ultima_atualizacao' : self.ultima_autualizacao_pagina(),
@@ -161,7 +167,9 @@ class Parser:
 
         return pagina
     
-    def __call__(self)->dict:
+    def __call__(self, html:str)->dict:
+
+        self.set_html(html)
 
         return self.parse_page()
 
