@@ -48,6 +48,10 @@ class Parser:
 
         return resumo_artigo.contents[0]
     
+    def __clean_non_breaking_space(self, text:str)->str:
+
+        return text.replace(u'\xa0', u' ')
+    
     def titulo_comunicado(self, titulo_raw:str)->str:
         
         titulo = re.sub(PATT_COMUNICADO, '', titulo_raw, 
@@ -56,7 +60,7 @@ class Parser:
         titulo_limpo =  titulo.strip()
         titulo_limpo = re.sub('^(- |– )', '', titulo_limpo)
 
-        return titulo_limpo
+        return self.__clean_non_breaking_space(titulo_limpo)
     
     def __numero_comunicado_raw(self, titulo_raw:str)->str:
 
@@ -67,6 +71,8 @@ class Parser:
         apenas_num = re.search(patt_num, num_string).group()
 
         return apenas_num
+    
+    
     
     def numero_comunicado(self, numero_comunicado_raw:str)->int:
 
@@ -91,6 +97,14 @@ class Parser:
         data = re.search(date_pattern, cleaned_text).group()
 
         return data
+    
+    def descricao_comunicado(self, artigo:elements.Tag)->str:
+
+        desc = artigo.find('p', {'class' : 'description discreet'})
+        if desc is None:
+            return ''
+        desc = desc.text
+        return self.__clean_non_breaking_space(desc)
 
     def parse_comunicado(self, artigo:elements.Tag)->dict:
 
@@ -106,13 +120,16 @@ class Parser:
         link = self.link_comunicado(resumo)
 
         data = self.data_comunicado(artigo)
+        
+        descricao = self.descricao_comunicado(artigo)
 
         parsed = {
             'titulo' : titulo,
             'numero' : numero,
             'ano' : ano,
             'link' : link,
-            'data' : data
+            'data' : data,
+            'descricao' : descricao
 
         }
 
@@ -129,8 +146,8 @@ class Parser:
                 comunicado_parsed = self.parse_comunicado(artigo)
                 parsed_data.append(comunicado_parsed)
             except Exception as e:
-                print(e)
                 print(artigo)
+                raise(e)
         
         return parsed_data
 
