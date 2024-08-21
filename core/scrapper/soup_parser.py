@@ -82,6 +82,15 @@ class Parser:
 
         return resumo.get('href')
     
+    def data_comunicado(self, artigo:elements.Tag)->str:
+
+        text = artigo.find('span', {'class' : 'documentByLine'}).text
+        cleaned_text = re.sub(r'\s+', ' ', text).strip()
+
+        date_pattern = r'\b\d{2}/\d{2}/\d{4}\b'
+        data = re.search(date_pattern, cleaned_text).group()
+
+        return data
 
     def parse_comunicado(self, artigo:elements.Tag)->dict:
 
@@ -96,11 +105,14 @@ class Parser:
 
         link = self.link_comunicado(resumo)
 
+        data = self.data_comunicado(artigo)
+
         parsed = {
             'titulo' : titulo,
             'numero' : numero,
             'ano' : ano,
             'link' : link,
+            'data' : data
 
         }
 
