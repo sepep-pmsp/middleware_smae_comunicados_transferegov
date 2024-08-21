@@ -58,7 +58,7 @@ class Parser:
 
         return titulo_limpo
     
-    def numero_comunicado(self, titulo_raw:str)->str:
+    def __numero_comunicado_raw(self, titulo_raw:str)->str:
 
         num_string = re.search(PATT_COMUNICADO, titulo_raw, 
                                flags=re.IGNORECASE).group()
@@ -68,22 +68,39 @@ class Parser:
 
         return apenas_num
     
+    def numero_comunicado(self, numero_comunicado_raw:str)->int:
+
+        apenas_numero  = numero_comunicado_raw.split('/')[0].strip()
+        return int(apenas_numero)
+    
+    def ano_comunicado(self, numero_comunicado_raw:str)->int:
+
+        apenas_ano  = numero_comunicado_raw.split('/')[1].strip()
+        return int(apenas_ano)
+    
+    def link_comunicado(self, resumo:elements.Tag)->str:
+
+        return resumo.get('href')
+    
 
     def parse_comunicado(self, artigo:elements.Tag)->dict:
 
         resumo = self.__resumo_artigo(artigo)
+
         titulo_raw = self.__titulo_artigo_raw(resumo)
-
         titulo  =  self.titulo_comunicado(titulo_raw)
-        numero_tudo = self.numero_comunicado(titulo_raw)
-        apenas_numero  = numero_tudo.split('/')[0]
-        apenas_ano = numero_tudo.split('/')[1]
 
+        numero_raw = self.__numero_comunicado_raw(titulo_raw)
+        numero = self.numero_comunicado(numero_raw)
+        ano = self.ano_comunicado(numero_raw)
+
+        link = self.link_comunicado(resumo)
 
         parsed = {
             'titulo' : titulo,
-            'numero' : apenas_numero,
-            'ano' : apenas_ano
+            'numero' : numero,
+            'ano' : ano,
+            'link' : link,
 
         }
 
