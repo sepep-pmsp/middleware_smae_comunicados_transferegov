@@ -1,4 +1,4 @@
-from .exceptions import MissingData
+from core.exceptions import MissingData
 from functools import wraps
 
 def raise_for_missing_data(atributo:str):
